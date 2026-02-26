@@ -38,25 +38,53 @@ object hw02 extends js.util.JsApp:
   def repOk(t: Tree): Boolean =
     def check(t: Tree, min: Int, max: Int): Boolean = t match
       case Empty => true
-      case Node(left, data, right) => ???
+      case Node(left, data, right) =>
+        min < data && data < max &&
+          check(left, data, max) &&
+          check(right, min, data)
+
     check(t, Int.MinValue, Int.MaxValue)
 
-  def insert(t: Tree, n: Int): Tree =
-    ???
+  def insert(t: Tree, n: Int): Tree = t match
+    case Empty => Node(Empty, n, Empty)
+    case Node(left, data, right) =>
+      n.compareTo(data) match
+        case 0 => t
+        case 1 => Node(insert(left, n), data, right)
+        case _ => Node(left, data, insert(right, n))
 
   def deleteMin(t: Tree): (Tree, Int) =
     require(t != Empty)
     (t: @unchecked) match
       case Node(left, data, Empty) => (left, data)
-      case Node(left, data, right) => ???
-        
-  def delete(t: Tree, n: Int): Tree =
-    ???
+      case Node(left, data, right) =>
+        val (right1, min) = deleteMin(right)
+        (Node(left, data, right1), min)
+
+  def delete(t: Tree, n: Int): Tree = t match
+    case Empty => Empty
+    case Node(left, data, right) =>
+      if n > data then Node(delete(left, n), data, right)
+      else if n < data then Node(left, data, delete(right, n))
+      else if left == Empty then right
+      else
+        val (left1, min) = deleteMin(left)
+        Node(left1, min, right)
 
   /* Problem 2: JakartaScript */
 
-  def eval(e: Expr): Double =
-    ???
+  def eval(e: Expr): Double = e match
+    case Num(n) => n
+    case UnOp(UMinus, e) => -eval(e)
+    case BinOp(op, e1, e2) =>
+      val n1 = eval(e1)
+      val n2 = eval(e2)
+      op match
+        case Plus => n1 + n2
+        case Minus => n1 - n2
+        case Times => n1 * n2
+        case Div => n1 / n2
+
 
 
   // Interface to run your interpreter from a string.  This is convenient
